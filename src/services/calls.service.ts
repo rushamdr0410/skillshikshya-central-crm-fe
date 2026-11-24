@@ -11,4 +11,8 @@ export const callsService = {
     const { data } = await api.get<CallSummary>("/calls/summary/", { params });
     return data;
   },
+  async exportCsv(params: CallFilterParams = {}) {
+    const { data } = await api.get<Blob>("/calls/export/", { params, responseType: "blob" });
+    return data;
+  },
 };

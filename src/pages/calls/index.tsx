@@ -4,6 +4,8 @@ import {
   ArrowUpDown,
   ChevronLeft,
   ChevronRight,
+  Download,
+  Loader2,
   PhoneCall,
 } from "lucide-react";
 import { useEffect } from "react";
@@ -13,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { PAGE_SIZE, useCallFilters, type CallSortColumn } from "@/hooks/use-call-filters";
-import { useCalls, useCallSummary } from "@/hooks/use-calls";
+import { useCalls, useCallSummary, useExportCalls } from "@/hooks/use-calls";
 import { formatDateTime } from "@/lib/leads-format";
 import { cn } from "@/lib/utils";
 import { CallFilters } from "./call-filters";
@@ -53,6 +55,7 @@ export default function CallsPage() {
   const { state, actions, filterParams, listParams, hasActiveFilters } = useCallFilters();
   const calls = useCalls(listParams);
   const summary = useCallSummary(filterParams);
+  const exportCalls = useExportCalls();
 
   // A page past the end makes DRF answer 404: fall back to page 1.
   useEffect(() => {
@@ -66,13 +69,23 @@ export default function CallsPage() {
 
   return (
     <div className="min-w-0 space-y-6">
-      <div>
-        <p className="text-brand font-mono text-[11px] font-bold tracking-wider uppercase">CRM Workspace</p>
-        <h1 className="font-headline mt-1 text-3xl font-semibold tracking-tight">Calls</h1>
-        <p className="text-muted-foreground mt-1 text-sm">
-          Every call your team has logged, newest first.
-        </p>
-      </div>
+        <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+                <p className="text-brand font-mono text-[11px] font-bold tracking-wider uppercase">CRM Workspace</p>
+                <h1 className="font-headline mt-1 text-3xl font-semibold tracking-tight">Calls</h1>
+                <p className="text-muted-foreground mt-1 text-sm">
+                Every call your team has logged, newest first.
+                </p>
+            </div>
+            <Button
+                variant="outline"
+                onClick={() => exportCalls.mutate(filterParams)}
+                disabled={exportCalls.isPending}
+            >
+                {exportCalls.isPending ? <Loader2 className="animate-spin" /> : <Download />}
+                Export CSV
+            </Button>
+        </div>
 
       <CallFilters state={state} actions={actions} />
 
