@@ -13,10 +13,11 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { PAGE_SIZE, useCallFilters, type CallSortColumn } from "@/hooks/use-call-filters";
-import { useCalls } from "@/hooks/use-calls";
+import { useCalls, useCallSummary } from "@/hooks/use-calls";
 import { formatDateTime } from "@/lib/leads-format";
 import { cn } from "@/lib/utils";
 import { CallFilters } from "./call-filters";
+import { CallSummary } from "./call-summary";
 
 const COLUMNS = 8;
 
@@ -49,8 +50,9 @@ function SortHead({
 }
 
 export default function CallsPage() {
-  const { state, actions, listParams, hasActiveFilters } = useCallFilters();
+  const { state, actions, filterParams, listParams, hasActiveFilters } = useCallFilters();
   const calls = useCalls(listParams);
+  const summary = useCallSummary(filterParams);
 
   // A page past the end makes DRF answer 404: fall back to page 1.
   useEffect(() => {
@@ -73,6 +75,8 @@ export default function CallsPage() {
       </div>
 
       <CallFilters state={state} actions={actions} />
+
+      <CallSummary query={summary} />
 
       <div className="bg-card overflow-hidden rounded-2xl border shadow-[0_1px_3px_0_rgba(0,0,0,0.05),0_1px_2px_-1px_rgba(0,0,0,0.05)]">
         <div className={cn("overflow-x-auto", calls.isPlaceholderData && "opacity-60")}>
