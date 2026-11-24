@@ -8,7 +8,7 @@ import {
   Loader2,
   PhoneCall,
 } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -20,6 +20,8 @@ import { formatDateTime } from "@/lib/leads-format";
 import { cn } from "@/lib/utils";
 import { CallFilters } from "./call-filters";
 import { CallSummary } from "./call-summary";
+import type { ApiGlobalCall } from "@/types/calls";
+import { CallDetailSheet } from "./call-detail-sheet";
 
 const COLUMNS = 8;
 
@@ -56,6 +58,7 @@ export default function CallsPage() {
   const calls = useCalls(listParams);
   const summary = useCallSummary(filterParams);
   const exportCalls = useExportCalls();
+  const [selected, setSelected] = useState<ApiGlobalCall | null>(null);
 
   // A page past the end makes DRF answer 404: fall back to page 1.
   useEffect(() => {
@@ -144,7 +147,15 @@ export default function CallsPage() {
               )}
 
               {rows.map((c) => (
-                <TableRow key={c.id}>
+                <TableRow
+                  key={c.id}
+                  onClick={() => setSelected(c)}
+                  className="cursor-pointer"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") setSelected(c);
+                  }}
+                >
                   <TableCell className="whitespace-nowrap">{formatDateTime(c.call_timestamp)}</TableCell>
                   <TableCell>
                     <Badge
@@ -160,7 +171,7 @@ export default function CallsPage() {
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <Link to={`/leads/${c.lead}`} className="font-semibold hover:underline">
+                    <Link to={`/leads/${c.lead}`} className="font-semibold hover:underline" onClick={(e) => e.stopPropagation()}>
                       {c.lead_name}
                     </Link>
                     <p className="text-muted-foreground font-mono text-xs">{c.lead_reference_number}</p>
@@ -176,6 +187,7 @@ export default function CallsPage() {
                         target="_blank"
                         rel="noreferrer"
                         className="text-brand hover:underline"
+                        onClick={(e) => e.stopPropagation()}
                       >
                         Listen
                       </a>
@@ -215,6 +227,7 @@ export default function CallsPage() {
           </div>
         )}
       </div>
+      <CallDetailSheet call={selected} onClose={() => setSelected(null)} />
     </div>
   );
 }
